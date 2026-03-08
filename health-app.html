@@ -3,134 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>健康生活記錄 App</title>
+    <title>全方位健康管理 App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
-        .card { background: white; border-radius: 1.25rem; box-shadow: 0 4px 15px -3px rgba(0,0,0,0.05); }
-        .btn-active { background-color: white !important; color: #4f46e5 !important; shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f0f4f8; -webkit-tap-highlight-color: transparent; }
+        .card { background: white; border-radius: 1.25rem; box-shadow: 0 4px 15px -3px rgba(0,0,0,0.08); }
+        .input-field { width: 100%; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 0.6rem; font-size: 1rem; outline: none; transition: border 0.2s; }
+        .input-field:focus { border-color: #4f46e5; ring: 2px ring-indigo-100; }
+        .tab-active { background: #4f46e5; color: white; }
     </style>
 </head>
-<body class="pb-20">
+<body class="pb-24">
 
-    <header class="bg-indigo-600 text-white p-6 shadow-md mb-4 text-center sticky top-0 z-10">
-        <h1 class="text-xl font-bold" id="currentDate">載入中...</h1>
+    <header class="bg-indigo-600 text-white p-6 shadow-md mb-4 text-center sticky top-0 z-50">
+        <h1 class="text-xl font-bold" id="currentDate">讀取中...</h1>
+        <div id="dailyWaterSummary" class="mt-2 text-sm bg-indigo-500 py-1 px-3 rounded-full inline-block">今日飲水：0 cc</div>
     </header>
 
     <main class="max-w-md mx-auto px-4 space-y-4">
         
-        <section class="card p-5 border border-indigo-50">
-            <h2 class="text-md font-bold mb-4 text-indigo-700 flex items-center">
-                <span class="mr-2">📝</span> 快速紀錄
+        <section class="card p-5 border-l-4 border-rose-400">
+            <h2 class="text-sm font-bold mb-3 text-rose-600 flex items-center">
+                <span class="mr-2">⚖️</span> 身體基本狀態
             </h2>
-            <div class="space-y-4">
+            <div class="grid grid-cols-2 gap-3 mb-3">
+                <input type="number" id="baseWeight" step="0.1" placeholder="體重 (kg)" class="input-field">
+                <input type="number" id="baseTemp" step="0.01" placeholder="體溫 (°C)" class="input-field">
+            </div>
+            <div class="flex items-center justify-between bg-rose-50 p-2 rounded-lg">
+                <span class="text-sm font-medium text-rose-700">🩸 生理期狀態</span>
+                <select id="periodStatus" class="bg-transparent text-sm font-bold text-rose-700 outline-none">
+                    <option value="">無</option>
+                    <option value="開始">🚩 開始</option>
+                    <option value="進行中">⏳ 進行中</option>
+                    <option value="結束">🏁 結束</option>
+                </select>
+            </div>
+        </section>
+
+        <section class="card p-5 border-l-4 border-indigo-400">
+            <h2 class="text-sm font-bold mb-3 text-indigo-700 flex items-center">
+                <span class="mr-2">📝</span> 生活紀錄
+            </h2>
+            <div class="space-y-3">
                 <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-400 mb-1">時間</label>
-                        <input type="time" id="inputTime" class="w-full border-gray-200 border rounded-lg p-2 text-base focus:ring-2 focus:ring-indigo-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-400 mb-1">分類</label>
-                        <select id="inputCategory" class="w-full border-gray-200 border rounded-lg p-2 text-base focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
-                            <option value="飲食">🍎 飲食</option>
-                            <option value="運動">🏃 運動</option>
-                            <option value="飲水">💧 飲水量</option>
-                            <option value="排便">💩 排便</option>
-                        </select>
-                    </div>
+                    <input type="time" id="inputTime" class="input-field">
+                    <select id="inputCategory" class="input-field bg-white text-sm">
+                        <option value="飲食">🍎 飲食</option>
+                        <option value="運動">🏃 運動</option>
+                        <option value="飲水">💧 飲水 (填數字)</option>
+                        <option value="排便">💩 排便</option>
+                        <option value="休息">🛌 休息</option>
+                        <option value="其他">✨ 其他</option>
+                    </select>
                 </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-gray-400 mb-1">輸入內容</label>
-                    <input type="text" id="inputContent" placeholder="例如：雞肉飯、跑步 5km" class="w-full border-gray-200 border rounded-lg p-2 text-base focus:ring-2 focus:ring-indigo-500 outline-none">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-gray-400 mb-1">身體狀態 / 備註</label>
-                    <textarea id="inputNote" rows="2" placeholder="紀錄身體感受..." class="w-full border-gray-200 border rounded-lg p-2 text-base focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
-                </div>
-
-                <button onclick="saveData()" id="saveBtn" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold transition-all shadow-lg active:bg-indigo-800">
-                    儲存紀錄
+                <input type="text" id="inputContent" placeholder="內容 (如: 500cc 或 雞肉飯)" class="input-field">
+                <textarea id="inputNote" rows="2" placeholder="身體備註..." class="input-field text-sm"></textarea>
+                <button onclick="saveData()" id="saveBtn" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold shadow-lg active:scale-95 transition-transform">
+                    儲存今日紀錄
                 </button>
             </div>
         </section>
 
-        <section class="flex gap-2 items-center bg-white p-3 rounded-xl shadow-sm border border-gray-100">
-            <input type="month" id="searchMonth" onchange="renderList('month')" class="flex-1 p-2 bg-transparent text-sm font-medium outline-none">
-            <button onclick="exportExcel()" class="bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-bold">匯出 Excel</button>
+        <section class="flex gap-2 items-center">
+            <input type="month" id="searchMonth" onchange="renderList('month')" class="flex-1 p-2 rounded-xl border bg-white text-sm font-medium outline-none">
+            <button onclick="exportExcel()" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-sm">匯出 Excel</button>
         </section>
 
         <section class="card p-4">
-            <div class="flex border-b mb-4 bg-gray-100 rounded-lg p-1">
-                <button onclick="renderList('day')" class="flex-1 py-2 text-xs font-bold rounded-md transition-all" id="btn-day">當日</button>
-                <button onclick="renderList('week')" class="flex-1 py-2 text-xs font-bold rounded-md transition-all" id="btn-week">當周</button>
-                <button onclick="renderList('month')" class="flex-1 py-2 text-xs font-bold rounded-md transition-all" id="btn-month">當月</button>
+            <div class="flex bg-gray-100 rounded-xl p-1 mb-4">
+                <button onclick="renderList('day')" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all" id="btn-day">當日</button>
+                <button onclick="renderList('week')" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all" id="btn-week">當周</button>
+                <button onclick="renderList('month')" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all" id="btn-month">月查詢</button>
             </div>
-            <div id="dataList" class="space-y-3 min-h-[150px]">
-                </div>
+            <div id="dataList" class="space-y-3 min-h-[200px]"></div>
         </section>
     </main>
 
     <script>
-        // 確保資料正確載入
-        let records = JSON.parse(localStorage.getItem('healthRecords')) || [];
+        let records = JSON.parse(localStorage.getItem('healthRecordsV2')) || [];
 
         function init() {
             const now = new Date();
-            // 設定顯示日期
             document.getElementById('currentDate').innerText = now.toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });
-            // 設定預設時間 (24小時制)
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            document.getElementById('inputTime').value = `${hours}:${minutes}`;
-            // 設定搜尋月份
+            document.getElementById('inputTime').value = now.toTimeString().slice(0,5);
             document.getElementById('searchMonth').value = now.toISOString().slice(0, 7);
-            
+            updateWaterSummary();
             renderList('day');
         }
 
         function saveData() {
+            const category = document.getElementById('inputCategory').value;
             const content = document.getElementById('inputContent').value;
             const note = document.getElementById('inputNote').value;
-            const category = document.getElementById('inputCategory').value;
-            const time = document.getElementById('inputTime').value;
             
-            if(!content && !note) {
-                alert('請至少輸入一項內容或備註！');
+            // 基本狀態欄位
+            const weight = document.getElementById('baseWeight').value;
+            const temp = document.getElementById('baseTemp').value;
+            const period = document.getElementById('periodStatus').value;
+
+            if(!content && !note && !weight && !temp && !period) {
+                alert('請填寫內容或基本狀態！');
                 return;
             }
 
             const now = new Date();
             const record = {
                 id: Date.now(),
-                date: now.toLocaleDateString('en-CA'), // 格式為 YYYY-MM-DD
-                time: time,
+                date: now.toLocaleDateString('en-CA'),
+                time: document.getElementById('inputTime').value,
                 category: category,
                 content: content,
                 note: note,
+                weight: weight,
+                temp: temp,
+                period: period,
                 timestamp: now.getTime()
             };
 
             records.unshift(record);
-            localStorage.setItem('healthRecords', JSON.stringify(records));
+            localStorage.setItem('healthRecordsV2', JSON.stringify(records));
             
-            // 清空輸入並給予反饋
+            // 清空部分輸入
             document.getElementById('inputContent').value = '';
             document.getElementById('inputNote').value = '';
             
             const btn = document.getElementById('saveBtn');
-            btn.innerText = '✅ 已儲存';
-            btn.classList.replace('bg-indigo-600', 'bg-green-500');
-            
+            btn.innerText = '✅ 儲存成功';
+            btn.className = btn.className.replace('bg-indigo-600', 'bg-green-500');
             setTimeout(() => {
-                btn.innerText = '儲存紀錄';
-                btn.classList.replace('bg-green-500', 'bg-indigo-600');
+                btn.innerText = '儲存今日紀錄';
+                btn.className = btn.className.replace('bg-green-500', 'bg-indigo-600');
             }, 1000);
 
-            renderList('day'); 
+            updateWaterSummary();
+            renderList('day');
+        }
+
+        function updateWaterSummary() {
+            const today = new Date().toLocaleDateString('en-CA');
+            const totalWater = records
+                .filter(r => r.date === today && r.category === '飲水')
+                .reduce((sum, r) => {
+                    const amount = parseInt(r.content.replace(/[^0-9]/g, '')) || 0;
+                    return sum + amount;
+                }, 0);
+            document.getElementById('dailyWaterSummary').innerText = `今日飲水：${totalWater} cc`;
         }
 
         function renderList(view) {
@@ -139,50 +159,52 @@
             const todayStr = now.toLocaleDateString('en-CA');
             let filtered = [];
 
-            // 切換按鈕樣式
+            // UI Tab 切換
             ['day', 'week', 'month'].forEach(v => {
                 const btn = document.getElementById(`btn-${v}`);
-                if (v === view) {
-                    btn.classList.add('bg-white', 'text-indigo-600', 'shadow-sm');
-                    btn.classList.remove('text-gray-400');
-                } else {
-                    btn.classList.remove('bg-white', 'text-indigo-600', 'shadow-sm');
-                    btn.classList.add('text-gray-400');
-                }
+                btn.className = v === view ? "flex-1 py-2 text-xs font-bold rounded-lg tab-active shadow-sm" : "flex-1 py-2 text-xs font-bold text-gray-400";
             });
 
-            if (view === 'day') {
-                filtered = records.filter(r => r.date === todayStr);
-            } else if (view === 'week') {
+            if (view === 'day') filtered = records.filter(r => r.date === todayStr);
+            else if (view === 'week') {
                 const oneWeekAgo = now.getTime() - (7 * 24 * 60 * 60 * 1000);
                 filtered = records.filter(r => r.timestamp >= oneWeekAgo);
-            } else if (view === 'month') {
+            }
+            else if (view === 'month') {
                 const targetMonth = document.getElementById('searchMonth').value;
                 filtered = records.filter(r => r.date.startsWith(targetMonth));
             }
 
             if (filtered.length === 0) {
-                listContainer.innerHTML = `<div class="text-center text-gray-300 py-10 text-sm">目前沒有相關紀錄</div>`;
+                listContainer.innerHTML = `<div class="text-center text-gray-300 py-10 text-xs">目前尚無紀錄</div>`;
                 return;
             }
 
             listContainer.innerHTML = filtered.map(r => `
-                <div class="p-3 border-b border-gray-50 bg-indigo-50/30 rounded-xl relative">
-                    <div class="flex justify-between items-start mb-1">
-                        <span class="text-[10px] font-bold text-indigo-400 bg-white px-2 py-0.5 rounded-full shadow-sm">${r.date} ${r.time}</span>
-                        <button onclick="deleteRecord(${r.id})" class="text-red-300 p-1 text-xs">刪除</button>
+                <div class="p-4 bg-white border border-gray-100 rounded-2xl shadow-sm relative">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[10px] font-bold text-white bg-indigo-400 px-2 py-0.5 rounded-full">${r.date} ${r.time}</span>
+                        <button onclick="deleteRecord(${r.id})" class="text-gray-300 hover:text-red-400 text-xs">刪除</button>
                     </div>
-                    <div class="font-bold text-gray-800 text-sm">${r.category}：${r.content || '(無內容)'}</div>
-                    ${r.note ? `<div class="text-xs text-gray-500 mt-1 bg-white/50 p-2 rounded border border-white">💡 ${r.note}</div>` : ''}
+                    <div class="flex items-baseline gap-2">
+                        <span class="font-bold text-gray-800 text-sm">${r.category}</span>
+                        <span class="text-sm text-gray-600">${r.content || ''}</span>
+                    </div>
+                    <div class="flex flex-wrap gap-2 mt-2">
+                        ${r.weight ? `<span class="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded">⚖️ ${r.weight}kg</span>` : ''}
+                        ${r.temp ? `<span class="text-[10px] bg-orange-50 text-orange-600 px-2 py-0.5 rounded">🌡️ ${r.temp}°C</span>` : ''}
+                        ${r.period ? `<span class="text-[10px] bg-rose-50 text-rose-600 px-2 py-0.5 rounded">🩸 生理期:${r.period}</span>` : ''}
+                    </div>
+                    ${r.note ? `<div class="text-xs text-gray-500 mt-2 bg-gray-50 p-2 rounded-lg italic">"${r.note}"</div>` : ''}
                 </div>
             `).join('');
         }
 
         function deleteRecord(id) {
-            if(confirm('確定要刪除這筆紀錄嗎？')) {
+            if(confirm('確定刪除此紀錄？')) {
                 records = records.filter(r => r.id !== id);
-                localStorage.setItem('healthRecords', JSON.stringify(records));
-                // 根據當前按鈕狀態決定渲染哪個列表，這裡簡單預設回當日
+                localStorage.setItem('healthRecordsV2', JSON.stringify(records));
+                updateWaterSummary();
                 renderList('day');
             }
         }
@@ -190,24 +212,19 @@
         function exportExcel() {
             const searchMonth = document.getElementById('searchMonth').value;
             const filtered = records.filter(r => r.date.startsWith(searchMonth));
-            
-            if (filtered.length === 0) return alert('此月份無資料可供匯出！');
+            if (filtered.length === 0) return alert('無資料可匯出！');
 
             const exportData = filtered.map(r => ({
-                '日期': r.date,
-                '時間': r.time,
-                '分類': r.category,
-                '內容': r.content,
-                '備註': r.note
+                '日期': r.date, '時間': r.time, '分類': r.category, '內容': r.content,
+                '體重': r.weight, '體溫': r.temp, '生理期': r.period, '備註': r.note
             }));
 
             const ws = XLSX.utils.json_to_sheet(exportData);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "紀錄");
-            XLSX.writeFile(wb, `健康紀錄_${searchMonth}.xlsx`);
+            XLSX.utils.book_append_sheet(wb, ws, "健康數據");
+            XLSX.writeFile(wb, `健康管理報告_${searchMonth}.xlsx`);
         }
 
-        // 初始化頁面
         window.onload = init;
     </script>
 </body>
