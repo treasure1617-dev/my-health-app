@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健康生活記錄 App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f3f4f6; }
+        .card { background: white; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body class="pb-10">
+
+    <header class="bg-blue-600 text-white p-6 shadow-lg mb-6 text-center">
+        <h1 class="text-2xl font-bold" id="currentDate">載入日期中...</h1>
+        <p class="text-blue-100 text-sm">你的健康生活助手</p>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 space-y-6">
+        
+        <section class="card p-6">
+            <h2 class="text-lg font-bold mb-4 text-gray-700 flex items-center">
+                <span class="mr-2">📝</span> 新增記錄
+            </h2>
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm text-gray-500">時間</label>
+                        <input type="time" id="inputTime" class="w-full border-b-2 border-gray-200 p-2 focus:border-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-500">分類</label>
+                        <select id="inputCategory" class="w-full border-b-2 border-gray-200 p-2 focus:border-blue-500 outline-none">
+                            <option value="飲食">🍎 飲食</option>
+                            <option value="運動">🏃 運動</option>
+                            <option value="飲水">💧 飲水量</option>
+                            <option value="排便">💩 排便</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-500">內容/身體狀態</label>
+                    <textarea id="inputStatus" rows="2" placeholder="紀錄今天的狀況..." class="w-full border-2 border-gray-100 rounded-lg p-2 focus:border-blue-500 outline-none"></textarea>
+                </div>
+                <button onclick="saveData()" class="w-full bg-blue-500 text-white py-3 rounded-xl font-bold active:scale-95 transition-transform">
+                    確認送出
+                </button>
+            </div>
+        </section>
+
+        <section class="flex gap-2">
+            <input type="month" id="searchMonth" class="flex-1 p-2 rounded-lg border border-gray-300">
+            <button onclick="exportExcel()" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm">匯出 Excel</button>
+        </section>
+
+        <section class="card p-4">
+            <div class="flex border-b mb-4">
+                <button onclick="renderList('day')" class="flex-1 py-2 font-bold text-blue-600 border-b-2 border-blue-600" id="btn-day">日</button>
+                <button onclick="renderList('week')" class="flex-1 py-2 text-gray-500" id="btn-week">周</button>
+                <button onclick="renderList('month')" class="flex-1 py-2 text-gray-500" id="btn-month">月</button>
+            </div>
+            <div id="dataList" class="space-y-3 min-h-[200px]">
+                </div>
+        </section>
+    </main>
+
+    <script>
+        let records = JSON.parse(localStorage.getItem('healthRecords')) || [];
+
+        // 初始化日期
+        document.getElementById('currentDate').innerText = new Date().toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+        document.getElementById('inputTime').value = new Date().toTimeString().slice(0,5);
+        document.getElementById('searchMonth').value = new Date().toISOString().slice(0, 7);
+
+        // 儲存資料
+        function saveData() {
+            const record = {
+                id: Date.now(),
+                date: new Date().toISOString().split('T')[0],
+                time: document.getElementById('inputTime').value,
+                category: document.getElementById('inputCategory').value,
+                status: document.getElementById('inputStatus').value,
+                timestamp: new Date()
+            };
+            records.unshift(record);
+            localStorage.setItem('healthRecords', JSON.stringify(records));
+            document.getElementById('inputStatus').value = '';
+            renderList('day');
+            alert('儲存成功！');
+        }
+
+        // 渲染列表
+        function renderList(view) {
+            const listContainer = document.getElementById('dataList');
+            const now = new Date();
+            let filtered = records;
+
+            // 切換按鈕樣式
+            ['day', 'week', 'month'].forEach(v => {
+                const btn = document.getElementById(`btn-${v}`);
+                btn.className = v === view ? "flex-1 py-2 font-bold text-blue-600 border-b-2 border-blue-600" : "flex-1 py-2 text-gray-500";
+            });
+
+            if (view === 'day') {
+                const today = now.toISOString().split('T')[0];
+                filtered = records.filter(r => r.date === today);
+            } else if (view === 'week') {
+                const oneWeekAgo = new Date(now.setDate(now.getDate() - 7));
+                filtered = records.filter(r => new Date(r.timestamp) >= oneWeekAgo);
+            } else if (view === 'month') {
+                const searchMonth = document.getElementById('searchMonth').value;
+                filtered = records.filter(r => r.date.startsWith(searchMonth));
+            }
+
+            if (filtered.length === 0) {
+                listContainer.innerHTML = '<p class="text-center text-gray-400 py-10">尚無資料</p>';
+                return;
+            }
+
+            listContainer.innerHTML = filtered.map(r => `
+                <div class="border-l-4 border-blue-400 pl-4 py-2 bg-gray-50 rounded-r-lg relative">
+                    <div class="text-xs text-gray-400">${r.date} ${r.time}</div>
+                    <div class="font-bold text-gray-700">${r.category}</div>
+                    <div class="text-sm text-gray-600">${r.status || '無備註'}</div>
+                    <button onclick="deleteRecord(${r.id})" class="absolute right-2 top-2 text-red-300 text-xs">刪除</button>
+                </div>
+            `).join('');
+        }
+
+        function deleteRecord(id) {
+            if(confirm('確定刪除？')) {
+                records = records.filter(r => r.id !== id);
+                localStorage.setItem('healthRecords', JSON.stringify(records));
+                renderList('day');
+            }
+        }
+
+        // 匯出 Excel
+        function exportExcel() {
+            const searchMonth = document.getElementById('searchMonth').value;
+            const filtered = records.filter(r => r.date.startsWith(searchMonth));
+            
+            if (filtered.length === 0) return alert('此月份無資料可匯出');
+
+            const ws = XLSX.utils.json_to_sheet(filtered.map(item => ({
+                '日期': item.date,
+                '時間': item.time,
+                '類別': item.category,
+                '內容與身體狀態': item.status
+            })));
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "健康記錄");
+            XLSX.writeFile(wb, `健康記錄_${searchMonth}.xlsx`);
+        }
+
+        renderList('day');
+    </script>
+</body>
+</html>
