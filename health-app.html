@@ -10,147 +10,219 @@
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
         body { font-family: 'Noto Sans TC', sans-serif; background-color: #f0f4f8; -webkit-tap-highlight-color: transparent; }
         .card { background: white; border-radius: 1.25rem; box-shadow: 0 4px 15px -3px rgba(0,0,0,0.08); }
-        .input-field { width: 100%; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 0.6rem; font-size: 1rem; outline: none; transition: border 0.2s; }
-        .input-field:focus { border-color: #4f46e5; ring: 2px ring-indigo-100; }
+        .input-field { width: 100%; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 0.6rem; font-size: 1rem; outline: none; transition: all 0.2s; }
+        .input-field:focus { border-color: #4f46e5; box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1); }
         .tab-active { background: #4f46e5; color: white; }
+        .timer-active { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+        .hidden { display: none; }
     </style>
 </head>
 <body class="pb-24">
 
     <header class="bg-indigo-600 text-white p-6 shadow-md mb-4 text-center sticky top-0 z-50">
-        <h1 class="text-xl font-bold" id="currentDate">讀取中...</h1>
-        <div id="dailyWaterSummary" class="mt-2 text-sm bg-indigo-500 py-1 px-3 rounded-full inline-block">今日飲水：0 cc</div>
+        <h1 class="text-xl font-bold" id="currentDate">載入中...</h1>
+        <div class="flex justify-center gap-2 mt-2">
+            <div id="dailyWaterSummary" class="text-[10px] bg-indigo-500 py-1 px-3 rounded-full border border-indigo-400">飲水：0 cc</div>
+            <div id="dailyExSummary" class="text-[10px] bg-indigo-500 py-1 px-3 rounded-full border border-indigo-400">運動：0 分鐘</div>
+        </div>
     </header>
 
     <main class="max-w-md mx-auto px-4 space-y-4">
         
-        <section class="card p-5 border-l-4 border-rose-400">
-            <h2 class="text-sm font-bold mb-3 text-rose-600 flex items-center">
-                <span class="mr-2">⚖️</span> 身體基本狀態
-            </h2>
-            <div class="grid grid-cols-2 gap-3 mb-3">
-                <input type="number" id="baseWeight" step="0.1" placeholder="體重 (kg)" class="input-field">
-                <input type="number" id="baseTemp" step="0.01" placeholder="體溫 (°C)" class="input-field">
+        <section id="timerSection" class="card p-5 border-l-4 border-orange-500 bg-orange-50">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-sm font-bold text-orange-700">🏃 運動計時器</h2>
+                <span id="timerDisplay" class="font-mono text-xl font-bold text-orange-600">00:00:00</span>
             </div>
-            <div class="flex items-center justify-between bg-rose-50 p-2 rounded-lg">
-                <span class="text-sm font-medium text-rose-700">🩸 生理期狀態</span>
-                <select id="periodStatus" class="bg-transparent text-sm font-bold text-rose-700 outline-none">
-                    <option value="">無</option>
-                    <option value="開始">🚩 開始</option>
-                    <option value="進行中">⏳ 進行中</option>
-                    <option value="結束">🏁 結束</option>
-                </select>
+            <div class="flex gap-2">
+                <button id="startTimerBtn" onclick="startTimer()" class="flex-1 bg-orange-500 text-white py-2 rounded-xl font-bold shadow-md active:scale-95 transition-all">開始運動</button>
+                <button id="stopTimerBtn" onclick="stopTimer()" class="flex-1 bg-red-500 text-white py-2 rounded-xl font-bold shadow-md active:scale-95 transition-all hidden">結束並存檔</button>
             </div>
+            <p id="timerHint" class="text-[10px] text-orange-400 mt-2 text-center hidden italic">計時中，您可以先去做運動，結束後再回來點擊</p>
         </section>
 
-        <section class="card p-5 border-l-4 border-indigo-400">
-            <h2 class="text-sm font-bold mb-3 text-indigo-700 flex items-center">
-                <span class="mr-2">📝</span> 生活紀錄
-            </h2>
+        <section class="card p-5 border-l-4 border-rose-400">
+            <h2 class="text-sm font-bold mb-3 text-rose-600">⚖️ 身體基本狀態</h2>
+            <div class="grid grid-cols-2 gap-3 mb-3">
+                <input type="number" id="baseWeight" step="0.1" placeholder="體重(kg)" class="input-field">
+                <input type="number" id="baseTemp" step="0.01" placeholder="體溫(°C)" class="input-field">
+            </div>
+            <select id="periodStatus" class="input-field bg-rose-50 text-rose-700 font-bold border-none">
+                <option value="">🩸 生理期狀態：無</option>
+                <option value="開始">🚩 生理期：開始</option>
+                <option value="進行中">⏳ 生理期：進行中</option>
+                <option value="結束">🏁 生理期：結束</option>
+            </select>
+        </section>
+
+        <section id="recordForm" class="card p-5 border-l-4 border-indigo-400">
+            <h2 class="text-sm font-bold mb-3 text-indigo-700">📝 生活紀錄</h2>
             <div class="space-y-3">
                 <div class="grid grid-cols-2 gap-3">
                     <input type="time" id="inputTime" class="input-field">
-                    <select id="inputCategory" class="input-field bg-white text-sm">
+                    <select id="inputCategory" onchange="toggleExerciseField()" class="input-field bg-white">
                         <option value="飲食">🍎 飲食</option>
                         <option value="運動">🏃 運動</option>
-                        <option value="飲水">💧 飲水 (填數字)</option>
+                        <option value="飲水">💧 飲水</option>
                         <option value="排便">💩 排便</option>
                         <option value="休息">🛌 休息</option>
                         <option value="其他">✨ 其他</option>
                     </select>
                 </div>
-                <input type="text" id="inputContent" placeholder="內容 (如: 500cc 或 雞肉飯)" class="input-field">
-                <textarea id="inputNote" rows="2" placeholder="身體備註..." class="input-field text-sm"></textarea>
+                
+                <div id="exerciseField" class="hidden">
+                    <label class="text-[10px] text-orange-500 font-bold ml-1">運動時長 (分鐘)</label>
+                    <input type="number" id="exDuration" placeholder="分鐘" class="input-field border-orange-200">
+                </div>
+
+                <input type="text" id="inputContent" placeholder="內容 (如：慢跑、雞肉飯、500cc)" class="input-field">
+                <textarea id="inputNote" rows="2" placeholder="備註..." class="input-field text-sm"></textarea>
+                
                 <button onclick="saveData()" id="saveBtn" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold shadow-lg active:scale-95 transition-transform">
-                    儲存今日紀錄
+                    儲存紀錄
                 </button>
             </div>
         </section>
 
-        <section class="flex gap-2 items-center">
-            <input type="month" id="searchMonth" onchange="renderList('month')" class="flex-1 p-2 rounded-xl border bg-white text-sm font-medium outline-none">
-            <button onclick="exportExcel()" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-sm">匯出 Excel</button>
+        <section class="flex gap-2">
+            <input type="month" id="searchMonth" onchange="renderList('month')" class="flex-1 p-2 rounded-xl border bg-white text-sm font-medium">
+            <button onclick="exportExcel()" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-bold">匯出 Excel</button>
         </section>
 
         <section class="card p-4">
-            <div class="flex bg-gray-100 rounded-xl p-1 mb-4">
-                <button onclick="renderList('day')" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all" id="btn-day">當日</button>
-                <button onclick="renderList('week')" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all" id="btn-week">當周</button>
-                <button onclick="renderList('month')" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all" id="btn-month">月查詢</button>
+            <div class="flex bg-gray-100 rounded-xl p-1 mb-4 text-[10px] font-bold">
+                <button onclick="renderList('day')" class="flex-1 py-2 rounded-lg transition-all" id="btn-day">當日</button>
+                <button onclick="renderList('week')" class="flex-1 py-2 rounded-lg transition-all" id="btn-week">當周</button>
+                <button onclick="renderList('month')" class="flex-1 py-2 rounded-lg transition-all" id="btn-month">月查詢</button>
             </div>
             <div id="dataList" class="space-y-3 min-h-[200px]"></div>
         </section>
     </main>
 
     <script>
-        let records = JSON.parse(localStorage.getItem('healthRecordsV2')) || [];
+        let records = JSON.parse(localStorage.getItem('healthRecordsV4')) || [];
+        let timerInterval = null;
+        let startTime = localStorage.getItem('exerciseStartTime') || null;
 
         function init() {
             const now = new Date();
             document.getElementById('currentDate').innerText = now.toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });
             document.getElementById('inputTime').value = now.toTimeString().slice(0,5);
             document.getElementById('searchMonth').value = now.toISOString().slice(0, 7);
-            updateWaterSummary();
+            
+            // 檢查是否正在計時
+            if (startTime) {
+                resumeTimer();
+            }
+
+            updateSummaries();
             renderList('day');
+        }
+
+        // 計時器邏輯
+        function startTimer() {
+            startTime = Date.now();
+            localStorage.setItem('exerciseStartTime', startTime);
+            resumeTimer();
+        }
+
+        function resumeTimer() {
+            document.getElementById('startTimerBtn').classList.add('hidden');
+            document.getElementById('stopTimerBtn').classList.remove('hidden');
+            document.getElementById('timerHint').classList.remove('hidden');
+            document.getElementById('timerDisplay').classList.add('timer-active');
+            
+            timerInterval = setInterval(updateTimerDisplay, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const elapsed = Date.now() - startTime;
+            const h = Math.floor(elapsed / 3600000).toString().padStart(2, '0');
+            const m = Math.floor((elapsed % 3600000) / 60000).toString().padStart(2, '0');
+            const s = Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0');
+            document.getElementById('timerDisplay').innerText = `${h}:${m}:${s}`;
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            const elapsedMs = Date.now() - startTime;
+            const elapsedMin = Math.round(elapsedMs / 60000) || 1; // 至少1分鐘
+            
+            const endTime = new Date().toTimeString().slice(0,5);
+            const startTimeStr = new Date(parseInt(startTime)).toTimeString().slice(0,5);
+
+            // 自動填入表單
+            document.getElementById('inputCategory').value = '運動';
+            document.getElementById('exDuration').value = elapsedMin;
+            document.getElementById('inputNote').value = `運動時段：${startTimeStr} - ${endTime}`;
+            toggleExerciseField();
+
+            // 重置計時器 UI
+            localStorage.removeItem('exerciseStartTime');
+            startTime = null;
+            document.getElementById('startTimerBtn').classList.remove('hidden');
+            document.getElementById('stopTimerBtn').classList.add('hidden');
+            document.getElementById('timerHint').classList.add('hidden');
+            document.getElementById('timerDisplay').classList.remove('timer-active');
+            document.getElementById('timerDisplay').innerText = "00:00:00";
+            
+            // 滾動到表單讓使用者儲存
+            document.getElementById('recordForm').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function toggleExerciseField() {
+            const cat = document.getElementById('inputCategory').value;
+            document.getElementById('exerciseField').classList.toggle('hidden', cat !== '運動');
         }
 
         function saveData() {
             const category = document.getElementById('inputCategory').value;
             const content = document.getElementById('inputContent').value;
             const note = document.getElementById('inputNote').value;
-            
-            // 基本狀態欄位
+            const exDuration = document.getElementById('exDuration').value;
             const weight = document.getElementById('baseWeight').value;
             const temp = document.getElementById('baseTemp').value;
             const period = document.getElementById('periodStatus').value;
-
-            if(!content && !note && !weight && !temp && !period) {
-                alert('請填寫內容或基本狀態！');
-                return;
-            }
 
             const now = new Date();
             const record = {
                 id: Date.now(),
                 date: now.toLocaleDateString('en-CA'),
                 time: document.getElementById('inputTime').value,
-                category: category,
-                content: content,
-                note: note,
-                weight: weight,
-                temp: temp,
-                period: period,
+                category, content, note, weight, temp, period,
+                exDuration: category === '運動' ? exDuration : null,
                 timestamp: now.getTime()
             };
 
             records.unshift(record);
-            localStorage.setItem('healthRecordsV2', JSON.stringify(records));
+            localStorage.setItem('healthRecordsV4', JSON.stringify(records));
             
-            // 清空部分輸入
             document.getElementById('inputContent').value = '';
             document.getElementById('inputNote').value = '';
+            document.getElementById('exDuration').value = '';
+            toggleExerciseField();
             
             const btn = document.getElementById('saveBtn');
             btn.innerText = '✅ 儲存成功';
-            btn.className = btn.className.replace('bg-indigo-600', 'bg-green-500');
-            setTimeout(() => {
-                btn.innerText = '儲存今日紀錄';
-                btn.className = btn.className.replace('bg-green-500', 'bg-indigo-600');
-            }, 1000);
+            setTimeout(() => btn.innerText = '儲存紀錄', 1000);
 
-            updateWaterSummary();
+            updateSummaries();
             renderList('day');
         }
 
-        function updateWaterSummary() {
+        function updateSummaries() {
             const today = new Date().toLocaleDateString('en-CA');
-            const totalWater = records
-                .filter(r => r.date === today && r.category === '飲水')
-                .reduce((sum, r) => {
-                    const amount = parseInt(r.content.replace(/[^0-9]/g, '')) || 0;
-                    return sum + amount;
-                }, 0);
-            document.getElementById('dailyWaterSummary').innerText = `今日飲水：${totalWater} cc`;
+            const todayRecords = records.filter(r => r.date === today);
+            
+            const water = todayRecords.filter(r => r.category === '飲水')
+                .reduce((s, r) => s + (parseInt(r.content.replace(/[^0-9]/g, '')) || 0), 0);
+            
+            const exercise = todayRecords.filter(r => r.category === '運動')
+                .reduce((s, r) => s + (parseInt(r.exDuration) || 0), 0);
+
+            document.getElementById('dailyWaterSummary').innerText = `飲水：${water} cc`;
+            document.getElementById('dailyExSummary').innerText = `運動：${exercise} 分`;
         }
 
         function renderList(view) {
@@ -159,70 +231,55 @@
             const todayStr = now.toLocaleDateString('en-CA');
             let filtered = [];
 
-            // UI Tab 切換
             ['day', 'week', 'month'].forEach(v => {
                 const btn = document.getElementById(`btn-${v}`);
-                btn.className = v === view ? "flex-1 py-2 text-xs font-bold rounded-lg tab-active shadow-sm" : "flex-1 py-2 text-xs font-bold text-gray-400";
+                btn.className = v === view ? "flex-1 py-2 rounded-lg tab-active shadow-sm" : "flex-1 py-2 text-gray-400";
             });
 
             if (view === 'day') filtered = records.filter(r => r.date === todayStr);
-            else if (view === 'week') {
-                const oneWeekAgo = now.getTime() - (7 * 24 * 60 * 60 * 1000);
-                filtered = records.filter(r => r.timestamp >= oneWeekAgo);
-            }
-            else if (view === 'month') {
-                const targetMonth = document.getElementById('searchMonth').value;
-                filtered = records.filter(r => r.date.startsWith(targetMonth));
-            }
+            else if (view === 'week') filtered = records.filter(r => r.timestamp >= now.getTime() - 604800000);
+            else if (view === 'month') filtered = records.filter(r => r.date.startsWith(document.getElementById('searchMonth').value));
 
-            if (filtered.length === 0) {
-                listContainer.innerHTML = `<div class="text-center text-gray-300 py-10 text-xs">目前尚無紀錄</div>`;
-                return;
-            }
-
-            listContainer.innerHTML = filtered.map(r => `
+            listContainer.innerHTML = filtered.length ? filtered.map(r => `
                 <div class="p-4 bg-white border border-gray-100 rounded-2xl shadow-sm relative">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-[10px] font-bold text-white bg-indigo-400 px-2 py-0.5 rounded-full">${r.date} ${r.time}</span>
-                        <button onclick="deleteRecord(${r.id})" class="text-gray-300 hover:text-red-400 text-xs">刪除</button>
+                    <div class="flex justify-between items-center mb-1 text-[9px] font-bold text-indigo-400">
+                        <span>${r.date} ${r.time}</span>
+                        <button onclick="deleteRecord(${r.id})" class="text-gray-300">刪除</button>
                     </div>
-                    <div class="flex items-baseline gap-2">
-                        <span class="font-bold text-gray-800 text-sm">${r.category}</span>
-                        <span class="text-sm text-gray-600">${r.content || ''}</span>
+                    <div class="text-sm">
+                        <span class="font-bold text-gray-800">${r.category}</span>
+                        ${r.exDuration ? `<span class="ml-2 text-orange-600 font-bold">⏱️ ${r.exDuration}min</span>` : ''}
+                        <span class="ml-1 text-gray-600">${r.content || ''}</span>
                     </div>
-                    <div class="flex flex-wrap gap-2 mt-2">
-                        ${r.weight ? `<span class="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded">⚖️ ${r.weight}kg</span>` : ''}
-                        ${r.temp ? `<span class="text-[10px] bg-orange-50 text-orange-600 px-2 py-0.5 rounded">🌡️ ${r.temp}°C</span>` : ''}
-                        ${r.period ? `<span class="text-[10px] bg-rose-50 text-rose-600 px-2 py-0.5 rounded">🩸 生理期:${r.period}</span>` : ''}
+                    <div class="flex gap-2 mt-2">
+                        ${r.weight ? `<span class="text-[9px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded font-bold">⚖️ ${r.weight}kg</span>` : ''}
+                        ${r.temp ? `<span class="text-[9px] bg-orange-50 text-orange-600 px-1.5 py-0.5 rounded font-bold">🌡️ ${r.temp}°C</span>` : ''}
+                        ${r.period ? `<span class="text-[9px] bg-rose-50 text-rose-600 px-1.5 py-0.5 rounded font-bold">🩸 生理期:${r.period}</span>` : ''}
                     </div>
-                    ${r.note ? `<div class="text-xs text-gray-500 mt-2 bg-gray-50 p-2 rounded-lg italic">"${r.note}"</div>` : ''}
+                    ${r.note ? `<div class="text-[11px] text-gray-400 mt-2 italic leading-relaxed bg-gray-50 p-2 rounded-lg">備註：${r.note}</div>` : ''}
                 </div>
-            `).join('');
+            `).join('') : '<div class="text-center text-gray-300 py-10 text-xs">尚無相關紀錄</div>';
         }
 
         function deleteRecord(id) {
-            if(confirm('確定刪除此紀錄？')) {
+            if(confirm('確定刪除這筆紀錄？')) {
                 records = records.filter(r => r.id !== id);
-                localStorage.setItem('healthRecordsV2', JSON.stringify(records));
-                updateWaterSummary();
+                localStorage.setItem('healthRecordsV4', JSON.stringify(records));
+                updateSummaries();
                 renderList('day');
             }
         }
 
         function exportExcel() {
-            const searchMonth = document.getElementById('searchMonth').value;
-            const filtered = records.filter(r => r.date.startsWith(searchMonth));
-            if (filtered.length === 0) return alert('無資料可匯出！');
-
-            const exportData = filtered.map(r => ({
+            const filtered = records.filter(r => r.date.startsWith(document.getElementById('searchMonth').value));
+            if (!filtered.length) return alert('此月份無資料！');
+            const ws = XLSX.utils.json_to_sheet(filtered.map(r => ({
                 '日期': r.date, '時間': r.time, '分類': r.category, '內容': r.content,
-                '體重': r.weight, '體溫': r.temp, '生理期': r.period, '備註': r.note
-            }));
-
-            const ws = XLSX.utils.json_to_sheet(exportData);
+                '運動時長(分)': r.exDuration, '體重': r.weight, '體溫': r.temp, '生理期': r.period, '備註': r.note
+            })));
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "健康數據");
-            XLSX.writeFile(wb, `健康管理報告_${searchMonth}.xlsx`);
+            XLSX.writeFile(wb, `健康管理報表_${document.getElementById('searchMonth').value}.xlsx`);
         }
 
         window.onload = init;
