@@ -3,43 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>全方位健康管理 App</title>
+    <title>全方位健康管理系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f0f4f8; -webkit-tap-highlight-color: transparent; }
-        .card { background: white; border-radius: 1.25rem; box-shadow: 0 4px 15px -3px rgba(0,0,0,0.08); }
-        .input-field { width: 100%; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 0.6rem; font-size: 1rem; outline: none; transition: all 0.2s; }
-        .input-field:focus { border-color: #4f46e5; box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1); }
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f1f5f9; -webkit-tap-highlight-color: transparent; }
+        .card { background: white; border-radius: 1.25rem; shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .input-field { width: 100%; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 0.6rem; font-size: 0.95rem; outline: none; transition: all 0.2s; }
+        .input-field:focus { border-color: #4f46e5; ring: 2px ring-indigo-100; }
         .tab-active { background: #4f46e5; color: white; }
-        .timer-active { animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
         .hidden { display: none; }
+        .medical-gradient { background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); }
     </style>
 </head>
 <body class="pb-24">
 
-    <header class="bg-indigo-600 text-white p-6 shadow-md mb-4 text-center sticky top-0 z-50">
+    <header class="bg-indigo-600 text-white p-6 shadow-lg mb-4 text-center sticky top-0 z-50">
         <h1 class="text-xl font-bold" id="currentDate">載入中...</h1>
-        <div class="flex justify-center gap-2 mt-2">
-            <div id="dailyWaterSummary" class="text-[10px] bg-indigo-500 py-1 px-3 rounded-full border border-indigo-400">飲水：0 cc</div>
-            <div id="dailyExSummary" class="text-[10px] bg-indigo-500 py-1 px-3 rounded-full border border-indigo-400">運動：0 分鐘</div>
+        <div class="flex flex-wrap justify-center gap-2 mt-2">
+            <div id="summaryWater" class="text-[10px] bg-white/20 px-2 py-1 rounded-full border border-white/30 text-white">💧 飲水: 0cc</div>
+            <div id="summaryEx" class="text-[10px] bg-white/20 px-2 py-1 rounded-full border border-white/30 text-white">🏃 運動: 0分</div>
+            <div id="summarySleep" class="text-[10px] bg-white/20 px-2 py-1 rounded-full border border-white/30 text-white">🌙 睡眠: 0h</div>
         </div>
     </header>
 
-    <main class="max-w-md mx-auto px-4 space-y-4">
+    <main class="max-w-md mx-auto px-4 space-y-5">
         
-        <section id="timerSection" class="card p-5 border-l-4 border-orange-500 bg-orange-50">
-            <div class="flex justify-between items-center mb-3">
-                <h2 class="text-sm font-bold text-orange-700">🏃 運動計時器</h2>
-                <span id="timerDisplay" class="font-mono text-xl font-bold text-orange-600">00:00:00</span>
+        <section class="grid grid-cols-2 gap-3">
+            <div id="exTimerBox" class="card p-4 border-t-4 border-orange-500 text-center">
+                <p class="text-[11px] font-bold text-gray-400 mb-1">🏃 運動計時</p>
+                <div id="exTimerDisplay" class="text-lg font-mono font-bold text-orange-600 mb-2">00:00:00</div>
+                <button id="exStartBtn" onclick="toggleTimer('ex')" class="w-full bg-orange-500 text-white py-1.5 rounded-lg text-sm font-bold shadow-sm">開始</button>
+                <button id="exStopBtn" onclick="stopTimer('ex')" class="w-full bg-red-500 text-white py-1.5 rounded-lg text-sm font-bold shadow-sm hidden">結束存檔</button>
             </div>
-            <div class="flex gap-2">
-                <button id="startTimerBtn" onclick="startTimer()" class="flex-1 bg-orange-500 text-white py-2 rounded-xl font-bold shadow-md active:scale-95 transition-all">開始運動</button>
-                <button id="stopTimerBtn" onclick="stopTimer()" class="flex-1 bg-red-500 text-white py-2 rounded-xl font-bold shadow-md active:scale-95 transition-all hidden">結束並存檔</button>
+            <div id="sleepTimerBox" class="card p-4 border-t-4 border-indigo-500 text-center">
+                <p class="text-[11px] font-bold text-gray-400 mb-1">🌙 睡眠計時</p>
+                <div id="sleepTimerDisplay" class="text-lg font-mono font-bold text-indigo-600 mb-2">00:00:00</div>
+                <button id="sleepStartBtn" onclick="toggleTimer('sleep')" class="w-full bg-indigo-500 text-white py-1.5 rounded-lg text-sm font-bold shadow-sm">睡覺去</button>
+                <button id="sleepStopBtn" onclick="stopTimer('sleep')" class="w-full bg-indigo-900 text-white py-1.5 rounded-lg text-sm font-bold shadow-sm hidden">醒來存檔</button>
             </div>
-            <p id="timerHint" class="text-[10px] text-orange-400 mt-2 text-center hidden italic">計時中，您可以先去做運動，結束後再回來點擊</p>
         </section>
 
         <section class="card p-5 border-l-4 border-rose-400">
@@ -48,7 +51,7 @@
                 <input type="number" id="baseWeight" step="0.1" placeholder="體重(kg)" class="input-field">
                 <input type="number" id="baseTemp" step="0.01" placeholder="體溫(°C)" class="input-field">
             </div>
-            <select id="periodStatus" class="input-field bg-rose-50 text-rose-700 font-bold border-none">
+            <select id="periodStatus" class="input-field bg-rose-50 text-rose-700 font-bold">
                 <option value="">🩸 生理期狀態：無</option>
                 <option value="開始">🚩 生理期：開始</option>
                 <option value="進行中">⏳ 生理期：進行中</option>
@@ -56,38 +59,43 @@
             </select>
         </section>
 
-        <section id="recordForm" class="card p-5 border-l-4 border-indigo-400">
+        <section id="recordForm" class="card p-5 border-l-4 border-indigo-500">
             <h2 class="text-sm font-bold mb-3 text-indigo-700">📝 生活紀錄</h2>
             <div class="space-y-3">
                 <div class="grid grid-cols-2 gap-3">
                     <input type="time" id="inputTime" class="input-field">
-                    <select id="inputCategory" onchange="toggleExerciseField()" class="input-field bg-white">
+                    <select id="inputCategory" onchange="checkCategory()" class="input-field bg-white">
                         <option value="飲食">🍎 飲食</option>
+                        <option value="吃藥">💊 吃藥</option>
                         <option value="運動">🏃 運動</option>
+                        <option value="睡眠">🌙 睡眠</option>
                         <option value="飲水">💧 飲水</option>
                         <option value="排便">💩 排便</option>
-                        <option value="休息">🛌 休息</option>
                         <option value="其他">✨ 其他</option>
                     </select>
                 </div>
-                
-                <div id="exerciseField" class="hidden">
-                    <label class="text-[10px] text-orange-500 font-bold ml-1">運動時長 (分鐘)</label>
-                    <input type="number" id="exDuration" placeholder="分鐘" class="input-field border-orange-200">
+                <div id="extraField" class="hidden">
+                    <input type="text" id="inputDuration" placeholder="時長 (分/小時)" class="input-field border-orange-200">
                 </div>
+                <input type="text" id="inputContent" placeholder="內容 (如：雞肉飯、止痛藥、500cc)" class="input-field">
+                <textarea id="inputNote" rows="2" placeholder="身體反應與症狀..." class="input-field text-sm"></textarea>
+                <button onclick="saveData()" id="saveBtn" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold shadow-lg active:scale-95 transition-all">儲存生活紀錄</button>
+            </div>
+        </section>
 
-                <input type="text" id="inputContent" placeholder="內容 (如：慢跑、雞肉飯、500cc)" class="input-field">
-                <textarea id="inputNote" rows="2" placeholder="備註..." class="input-field text-sm"></textarea>
-                
-                <button onclick="saveData()" id="saveBtn" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold shadow-lg active:scale-95 transition-transform">
-                    儲存紀錄
-                </button>
+        <section class="card p-5 medical-gradient border border-blue-200">
+            <h2 class="text-sm font-bold mb-3 text-blue-700 flex items-center">🏥 就醫紀錄專區</h2>
+            <div class="space-y-3">
+                <input type="text" id="medHospital" placeholder="醫院/診所名稱" class="input-field">
+                <textarea id="medSymptoms" rows="2" placeholder="當時的不舒服症狀..." class="input-field text-sm"></textarea>
+                <textarea id="medPrescription" rows="2" placeholder="醫生開藥明細 / 診斷建議..." class="input-field text-sm"></textarea>
+                <button onclick="saveMedicalRecord()" class="w-full bg-blue-600 text-white py-2 rounded-xl text-sm font-bold shadow-md">儲存就醫紀錄</button>
             </div>
         </section>
 
         <section class="flex gap-2">
             <input type="month" id="searchMonth" onchange="renderList('month')" class="flex-1 p-2 rounded-xl border bg-white text-sm font-medium">
-            <button onclick="exportExcel()" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-bold">匯出 Excel</button>
+            <button onclick="exportExcel()" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-bold">匯出完整報告</button>
         </section>
 
         <section class="card p-4">
@@ -101,9 +109,8 @@
     </main>
 
     <script>
-        let records = JSON.parse(localStorage.getItem('healthRecordsV4')) || [];
-        let timerInterval = null;
-        let startTime = localStorage.getItem('exerciseStartTime') || null;
+        let records = JSON.parse(localStorage.getItem('healthData_v5')) || [];
+        let timers = { ex: { start: null, interval: null }, sleep: { start: null, interval: null } };
 
         function init() {
             const now = new Date();
@@ -111,175 +118,177 @@
             document.getElementById('inputTime').value = now.toTimeString().slice(0,5);
             document.getElementById('searchMonth').value = now.toISOString().slice(0, 7);
             
-            // 檢查是否正在計時
-            if (startTime) {
-                resumeTimer();
-            }
-
-            updateSummaries();
+            // 恢復計時器
+            ['ex', 'sleep'].forEach(type => {
+                const saved = localStorage.getItem(`${type}_startTime`);
+                if (saved) {
+                    timers[type].start = parseInt(saved);
+                    resumeTimerUI(type);
+                }
+            });
+            updateSummary();
             renderList('day');
         }
 
         // 計時器邏輯
-        function startTimer() {
-            startTime = Date.now();
-            localStorage.setItem('exerciseStartTime', startTime);
-            resumeTimer();
+        function toggleTimer(type) {
+            timers[type].start = Date.now();
+            localStorage.setItem(`${type}_startTime`, timers[type].start);
+            resumeTimerUI(type);
         }
 
-        function resumeTimer() {
-            document.getElementById('startTimerBtn').classList.add('hidden');
-            document.getElementById('stopTimerBtn').classList.remove('hidden');
-            document.getElementById('timerHint').classList.remove('hidden');
-            document.getElementById('timerDisplay').classList.add('timer-active');
-            
-            timerInterval = setInterval(updateTimerDisplay, 1000);
+        function resumeTimerUI(type) {
+            document.getElementById(`${type}StartBtn`).classList.add('hidden');
+            document.getElementById(`${type}StopBtn`).classList.remove('hidden');
+            timers[type].interval = setInterval(() => {
+                const diff = Date.now() - timers[type].start;
+                const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
+                const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
+                const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+                document.getElementById(`${type}TimerDisplay`).innerText = `${h}:${m}:${s}`;
+            }, 1000);
         }
 
-        function updateTimerDisplay() {
-            const elapsed = Date.now() - startTime;
-            const h = Math.floor(elapsed / 3600000).toString().padStart(2, '0');
-            const m = Math.floor((elapsed % 3600000) / 60000).toString().padStart(2, '0');
-            const s = Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0');
-            document.getElementById('timerDisplay').innerText = `${h}:${m}:${s}`;
-        }
-
-        function stopTimer() {
-            clearInterval(timerInterval);
-            const elapsedMs = Date.now() - startTime;
-            const elapsedMin = Math.round(elapsedMs / 60000) || 1; // 至少1分鐘
+        function stopTimer(type) {
+            clearInterval(timers[type].interval);
+            const durationMs = Date.now() - timers[type].start;
+            const hours = Math.floor(durationMs / 3600000);
+            const mins = Math.round((durationMs % 3600000) / 60000);
             
-            const endTime = new Date().toTimeString().slice(0,5);
-            const startTimeStr = new Date(parseInt(startTime)).toTimeString().slice(0,5);
+            const startStr = new Date(timers[type].start).toTimeString().slice(0,5);
+            const endStr = new Date().toTimeString().slice(0,5);
 
-            // 自動填入表單
-            document.getElementById('inputCategory').value = '運動';
-            document.getElementById('exDuration').value = elapsedMin;
-            document.getElementById('inputNote').value = `運動時段：${startTimeStr} - ${endTime}`;
-            toggleExerciseField();
-
-            // 重置計時器 UI
-            localStorage.removeItem('exerciseStartTime');
-            startTime = null;
-            document.getElementById('startTimerBtn').classList.remove('hidden');
-            document.getElementById('stopTimerBtn').classList.add('hidden');
-            document.getElementById('timerHint').classList.add('hidden');
-            document.getElementById('timerDisplay').classList.remove('timer-active');
-            document.getElementById('timerDisplay').innerText = "00:00:00";
+            document.getElementById('inputCategory').value = type === 'ex' ? '運動' : '睡眠';
+            document.getElementById('inputDuration').value = type === 'ex' ? mins : `${hours}時${mins}分`;
+            document.getElementById('inputNote').value = `時段：${startStr} - ${endStr}`;
             
-            // 滾動到表單讓使用者儲存
+            checkCategory();
+            localStorage.removeItem(`${type}_startTime`);
+            document.getElementById(`${type}StartBtn`).classList.remove('hidden');
+            document.getElementById(`${type}StopBtn`).classList.add('hidden');
+            document.getElementById(`${type}TimerDisplay`).innerText = "00:00:00";
             document.getElementById('recordForm').scrollIntoView({ behavior: 'smooth' });
         }
 
-        function toggleExerciseField() {
+        function checkCategory() {
             const cat = document.getElementById('inputCategory').value;
-            document.getElementById('exerciseField').classList.toggle('hidden', cat !== '運動');
+            document.getElementById('extraField').classList.toggle('hidden', !['運動', '睡眠'].includes(cat));
         }
 
         function saveData() {
-            const category = document.getElementById('inputCategory').value;
-            const content = document.getElementById('inputContent').value;
-            const note = document.getElementById('inputNote').value;
-            const exDuration = document.getElementById('exDuration').value;
-            const weight = document.getElementById('baseWeight').value;
-            const temp = document.getElementById('baseTemp').value;
-            const period = document.getElementById('periodStatus').value;
+            const cat = document.getElementById('inputCategory').value;
+            saveRecord({
+                type: 'life',
+                category: cat,
+                content: document.getElementById('inputContent').value,
+                duration: document.getElementById('inputDuration').value,
+                note: document.getElementById('inputNote').value,
+                weight: document.getElementById('baseWeight').value,
+                temp: document.getElementById('baseTemp').value,
+                period: document.getElementById('periodStatus').value
+            });
+            // 清空輸入
+            ['inputContent', 'inputDuration', 'inputNote'].forEach(id => document.getElementById(id).value = '');
+        }
 
+        function saveMedicalRecord() {
+            saveRecord({
+                type: 'medical',
+                category: '🏥 就醫',
+                hospital: document.getElementById('medHospital').value,
+                symptoms: document.getElementById('medSymptoms').value,
+                prescription: document.getElementById('medPrescription').value
+            });
+            ['medHospital', 'medSymptoms', 'medPrescription'].forEach(id => document.getElementById(id).value = '');
+        }
+
+        function saveRecord(data) {
             const now = new Date();
             const record = {
                 id: Date.now(),
                 date: now.toLocaleDateString('en-CA'),
                 time: document.getElementById('inputTime').value,
-                category, content, note, weight, temp, period,
-                exDuration: category === '運動' ? exDuration : null,
-                timestamp: now.getTime()
+                timestamp: now.getTime(),
+                ...data
             };
-
             records.unshift(record);
-            localStorage.setItem('healthRecordsV4', JSON.stringify(records));
-            
-            document.getElementById('inputContent').value = '';
-            document.getElementById('inputNote').value = '';
-            document.getElementById('exDuration').value = '';
-            toggleExerciseField();
-            
-            const btn = document.getElementById('saveBtn');
-            btn.innerText = '✅ 儲存成功';
-            setTimeout(() => btn.innerText = '儲存紀錄', 1000);
-
-            updateSummaries();
+            localStorage.setItem('healthData_v5', JSON.stringify(records));
+            updateSummary();
             renderList('day');
+            alert('紀錄成功！');
         }
 
-        function updateSummaries() {
+        function updateSummary() {
             const today = new Date().toLocaleDateString('en-CA');
-            const todayRecords = records.filter(r => r.date === today);
+            const todayRecs = records.filter(r => r.date === today);
             
-            const water = todayRecords.filter(r => r.category === '飲水')
-                .reduce((s, r) => s + (parseInt(r.content.replace(/[^0-9]/g, '')) || 0), 0);
-            
-            const exercise = todayRecords.filter(r => r.category === '運動')
-                .reduce((s, r) => s + (parseInt(r.exDuration) || 0), 0);
+            const water = todayRecs.filter(r => r.category === '飲水').reduce((s, r) => s + (parseInt(r.content) || 0), 0);
+            const ex = todayRecs.filter(r => r.category === '運動').reduce((s, r) => s + (parseInt(r.duration) || 0), 0);
+            const sleep = todayRecs.filter(r => r.category === '睡眠').length; // 僅計次數
 
-            document.getElementById('dailyWaterSummary').innerText = `飲水：${water} cc`;
-            document.getElementById('dailyExSummary').innerText = `運動：${exercise} 分`;
+            document.getElementById('summaryWater').innerText = `💧 飲水: ${water}cc`;
+            document.getElementById('summaryEx').innerText = `🏃 運動: ${ex}分`;
+            document.getElementById('summarySleep').innerText = `🌙 睡眠紀錄: ${sleep}筆`;
         }
 
         function renderList(view) {
-            const listContainer = document.getElementById('dataList');
+            const container = document.getElementById('dataList');
             const now = new Date();
-            const todayStr = now.toLocaleDateString('en-CA');
-            let filtered = [];
+            let filtered = records;
 
-            ['day', 'week', 'month'].forEach(v => {
-                const btn = document.getElementById(`btn-${v}`);
-                btn.className = v === view ? "flex-1 py-2 rounded-lg tab-active shadow-sm" : "flex-1 py-2 text-gray-400";
-            });
-
-            if (view === 'day') filtered = records.filter(r => r.date === todayStr);
+            if (view === 'day') filtered = records.filter(r => r.date === now.toLocaleDateString('en-CA'));
             else if (view === 'week') filtered = records.filter(r => r.timestamp >= now.getTime() - 604800000);
             else if (view === 'month') filtered = records.filter(r => r.date.startsWith(document.getElementById('searchMonth').value));
 
-            listContainer.innerHTML = filtered.length ? filtered.map(r => `
-                <div class="p-4 bg-white border border-gray-100 rounded-2xl shadow-sm relative">
-                    <div class="flex justify-between items-center mb-1 text-[9px] font-bold text-indigo-400">
-                        <span>${r.date} ${r.time}</span>
-                        <button onclick="deleteRecord(${r.id})" class="text-gray-300">刪除</button>
+            container.innerHTML = filtered.map(r => `
+                <div class="p-4 card border border-gray-100 relative ${r.type === 'medical' ? 'medical-gradient border-blue-100' : ''}">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[9px] font-bold ${r.type === 'medical' ? 'text-blue-500' : 'text-indigo-400'}">${r.date} ${r.time}</span>
+                        <button onclick="deleteRecord(${r.id})" class="text-gray-300 hover:text-red-400">刪除</button>
                     </div>
-                    <div class="text-sm">
-                        <span class="font-bold text-gray-800">${r.category}</span>
-                        ${r.exDuration ? `<span class="ml-2 text-orange-600 font-bold">⏱️ ${r.exDuration}min</span>` : ''}
-                        <span class="ml-1 text-gray-600">${r.content || ''}</span>
-                    </div>
-                    <div class="flex gap-2 mt-2">
-                        ${r.weight ? `<span class="text-[9px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded font-bold">⚖️ ${r.weight}kg</span>` : ''}
-                        ${r.temp ? `<span class="text-[9px] bg-orange-50 text-orange-600 px-1.5 py-0.5 rounded font-bold">🌡️ ${r.temp}°C</span>` : ''}
-                        ${r.period ? `<span class="text-[9px] bg-rose-50 text-rose-600 px-1.5 py-0.5 rounded font-bold">🩸 生理期:${r.period}</span>` : ''}
-                    </div>
-                    ${r.note ? `<div class="text-[11px] text-gray-400 mt-2 italic leading-relaxed bg-gray-50 p-2 rounded-lg">備註：${r.note}</div>` : ''}
+                    
+                    ${r.type === 'medical' ? `
+                        <div class="text-sm font-bold text-blue-800">🏥 ${r.hospital}</div>
+                        <div class="text-xs text-blue-600 mt-1">症狀：${r.symptoms}</div>
+                        <div class="text-[11px] bg-white/60 p-2 rounded-lg mt-2 border border-blue-50 text-gray-700">💊 藥單/明細：${r.prescription}</div>
+                    ` : `
+                        <div class="text-sm flex items-center gap-2">
+                            <span class="font-bold text-gray-800">${r.category}</span>
+                            ${r.duration ? `<span class="text-orange-600 font-bold text-xs">[${r.duration}]</span>` : ''}
+                            <span class="text-gray-600">${r.content || ''}</span>
+                        </div>
+                        <div class="flex gap-2 mt-2">
+                            ${r.weight ? `<span class="text-[9px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded font-bold">⚖️ ${r.weight}kg</span>` : ''}
+                            ${r.temp ? `<span class="text-[9px] bg-orange-50 text-orange-600 px-1.5 py-0.5 rounded font-bold">🌡️ ${r.temp}°C</span>` : ''}
+                            ${r.period ? `<span class="text-[9px] bg-rose-50 text-rose-600 px-1.5 py-0.5 rounded font-bold">🩸 ${r.period}</span>` : ''}
+                        </div>
+                        ${r.note ? `<div class="text-[11px] text-gray-500 mt-2 italic bg-gray-50 p-2 rounded-lg leading-relaxed">症狀反應：${r.note}</div>` : ''}
+                    `}
                 </div>
-            `).join('') : '<div class="text-center text-gray-300 py-10 text-xs">尚無相關紀錄</div>';
+            `).join('') || '<div class="text-center text-gray-300 py-10">尚無紀錄</div>';
         }
 
-        function deleteRecord(id) {
-            if(confirm('確定刪除這筆紀錄？')) {
-                records = records.filter(r => r.id !== id);
-                localStorage.setItem('healthRecordsV4', JSON.stringify(records));
-                updateSummaries();
-                renderList('day');
-            }
-        }
+        function deleteRecord(id) { if(confirm('刪除？')) { records = records.filter(r => r.id !== id); localStorage.setItem('healthData_v5', JSON.stringify(records)); updateSummary(); renderList('day'); } }
 
         function exportExcel() {
-            const filtered = records.filter(r => r.date.startsWith(document.getElementById('searchMonth').value));
-            if (!filtered.length) return alert('此月份無資料！');
-            const ws = XLSX.utils.json_to_sheet(filtered.map(r => ({
-                '日期': r.date, '時間': r.time, '分類': r.category, '內容': r.content,
-                '運動時長(分)': r.exDuration, '體重': r.weight, '體溫': r.temp, '生理期': r.period, '備註': r.note
-            })));
+            const month = document.getElementById('searchMonth').value;
+            const filtered = records.filter(r => r.date.startsWith(month));
+            if(!filtered.length) return alert('無資料');
+
+            // 分離兩張表格
+            const lifeData = filtered.filter(r => r.type === 'life').map(r => ({
+                '日期': r.date, '時間': r.time, '分類': r.category, '內容': r.content, '時長': r.duration, 
+                '體重': r.weight, '體溫': r.temp, '生理期': r.period, '身體反應與症狀': r.note
+            }));
+
+            const medData = filtered.filter(r => r.type === 'medical').map(r => ({
+                '日期': r.date, '時間': r.time, '就醫診所': r.hospital, '當時症狀': r.symptoms, '醫生開藥/明細': r.prescription
+            }));
+
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "健康數據");
-            XLSX.writeFile(wb, `健康管理報表_${document.getElementById('searchMonth').value}.xlsx`);
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(lifeData), "日常紀錄");
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(medData), "就醫紀錄");
+            XLSX.writeFile(wb, `健康管理報告_${month}.xlsx`);
         }
 
         window.onload = init;
