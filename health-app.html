@@ -8,11 +8,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f1f5f9; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
         .card { background: white; border-radius: 1.25rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-        .input-field { width: 100%; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 0.7rem; font-size: 1rem; outline: none; transition: all 0.2s; background-color: white; }
+        .input-field { width: 100%; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 0.6rem; font-size: 1rem; outline: none; transition: all 0.2s; background-color: white; }
         .input-field:focus { border-color: #4f46e5; ring: 2px ring-indigo-100; }
-        .label-text { font-size: 0.75rem; font-weight: 700; color: #64748b; margin-left: 0.25rem; margin-bottom: 0.2rem; display: block; }
+        .label-text { font-size: 0.75rem; font-weight: 700; color: #64748b; margin-left: 0.25rem; margin-bottom: 0.25rem; display: block; }
         .hidden { display: none; }
     </style>
 </head>
@@ -23,7 +23,7 @@
         <div class="flex flex-wrap justify-center gap-2 mt-2">
             <div id="summaryWater" class="text-[10px] bg-white/20 px-2 py-1 rounded-full border border-white/30">💧 飲水: 0cc</div>
             <div id="summaryEx" class="text-[10px] bg-white/20 px-2 py-1 rounded-full border border-white/30">🏃 運動: 0分</div>
-            <div id="summarySleep" class="text-[10px] bg-white/20 px-2 py-1 rounded-full border border-white/30">🌙 睡眠: 0h</div>
+            <div id="summarySleep" class="text-[10px] bg-white/20 px-2 py-1 rounded-full border border-white/30">🌙 睡眠紀錄: 0筆</div>
         </div>
     </header>
 
@@ -33,27 +33,27 @@
             <div class="card p-4 border-t-4 border-orange-500 text-center">
                 <p class="text-[11px] font-bold text-gray-400 mb-1">🏃 運動計時</p>
                 <div id="exTimerDisplay" class="text-lg font-mono font-bold text-orange-600 mb-2">00:00:00</div>
-                <button id="exStartBtn" onclick="toggleTimer('ex')" class="w-full bg-orange-500 text-white py-1.5 rounded-lg text-sm font-bold shadow-sm active:scale-95">開始運動</button>
-                <button id="exStopBtn" onclick="stopTimer('ex')" class="w-full bg-red-500 text-white py-1.5 rounded-lg text-sm font-bold shadow-sm hidden active:scale-95">結束存檔</button>
+                <button id="exStartBtn" onclick="toggleTimer('ex')" class="w-full bg-orange-500 text-white py-1.5 rounded-lg text-sm font-bold shadow-sm">開始</button>
+                <button id="exStopBtn" onclick="stopTimer('ex')" class="w-full bg-red-500 text-white py-1.5 rounded-lg text-sm font-bold shadow-sm hidden">結束</button>
             </div>
             <div class="card p-4 border-t-4 border-indigo-500 text-center">
                 <p class="text-[11px] font-bold text-gray-400 mb-1">🌙 睡眠計時</p>
                 <div id="sleepTimerDisplay" class="text-lg font-mono font-bold text-indigo-600 mb-2">00:00:00</div>
-                <button id="sleepStartBtn" onclick="toggleTimer('sleep')" class="w-full bg-indigo-500 text-white py-1.5 rounded-lg text-sm font-bold shadow-sm active:scale-95">準備睡覺</button>
-                <button id="sleepStopBtn" onclick="stopTimer('sleep')" class="w-full bg-indigo-900 text-white py-1.5 rounded-lg text-sm font-bold shadow-sm hidden active:scale-95">我醒來了</button>
+                <button id="sleepStartBtn" onclick="toggleTimer('sleep')" class="w-full bg-indigo-500 text-white py-1.5 rounded-lg text-sm font-bold shadow-sm">睡覺</button>
+                <button id="sleepStopBtn" onclick="stopTimer('sleep')" class="w-full bg-indigo-900 text-white py-1.5 rounded-lg text-sm font-bold shadow-sm hidden">醒來</button>
             </div>
         </section>
 
         <section id="recordForm" class="card p-5 border-l-4 border-indigo-500">
-            <h2 class="text-sm font-bold mb-4 text-indigo-700">📝 新增紀錄</h2>
+            <h2 class="text-sm font-bold mb-4 text-indigo-700">📝 健康紀錄表單</h2>
             <div class="space-y-4">
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <span class="label-text">紀錄時間</span>
+                        <label class="label-text">記錄時間</label>
                         <input type="time" id="inputTime" class="input-field">
                     </div>
                     <div>
-                        <span class="label-text">分類項目</span>
+                        <label class="label-text">項目分類</label>
                         <select id="inputCategory" onchange="checkCategory()" class="input-field">
                             <option value="飲食">🍎 飲食</option>
                             <option value="吃藥">💊 吃藥</option>
@@ -68,50 +68,50 @@
                 </div>
 
                 <div>
-                    <span class="label-text" id="labelContent">內容 (詳細品項、運動項目或地點)</span>
-                    <input type="text" id="inputContent" placeholder="例如：雞肉飯+蛋、散步、某某診所" class="input-field">
+                    <label id="contentLabel" class="label-text">食物與藥物 / 活動內容</label>
+                    <input type="text" id="inputContent" placeholder="請輸入內容..." class="input-field">
                 </div>
-
+                
                 <div id="extraField" class="hidden">
-                    <span class="label-text">時長紀錄</span>
-                    <input type="text" id="inputDuration" placeholder="例如：45分鐘 或 8小時" class="input-field border-orange-200 bg-orange-50/30">
+                    <label class="label-text">持續時長</label>
+                    <input type="text" id="inputDuration" placeholder="例如: 60分鐘 或 8小時" class="input-field border-orange-200">
                 </div>
 
                 <div>
-                    <span class="label-text">身體反應與症狀</span>
-                    <textarea id="inputNote" rows="2" placeholder="紀錄身體的感覺..." class="input-field text-sm"></textarea>
+                    <label class="label-text">身體症狀與感受</label>
+                    <textarea id="inputSymptoms" rows="2" placeholder="紀錄當下的不適或感覺..." class="input-field text-sm"></textarea>
                 </div>
-
+                
                 <div>
-                    <span class="label-text">藥單明細 / 診斷內容</span>
-                    <textarea id="inputMedDetail" rows="2" placeholder="藥品名稱、醫生叮嚀或診斷結果..." class="input-field text-sm bg-blue-50/30 border-blue-100"></textarea>
+                    <label class="label-text">藥單明細 / 診斷內容</label>
+                    <textarea id="inputMedDetail" rows="2" placeholder="看診開藥或詳細醫囑..." class="input-field text-sm bg-blue-50/30"></textarea>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3 pt-2">
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <span class="label-text">體重 (kg)</span>
-                        <input type="number" id="baseWeight" step="0.1" placeholder="可不填" class="input-field text-sm">
+                        <label class="label-text">體重 (kg)</label>
+                        <input type="number" id="baseWeight" step="0.1" placeholder="選填" class="input-field text-sm">
                     </div>
                     <div>
-                        <span class="label-text">體溫 (°C)</span>
-                        <input type="number" id="baseTemp" step="0.1" placeholder="可不填" class="input-field text-sm">
+                        <label class="label-text">體溫 (°C)</label>
+                        <input type="number" id="baseTemp" step="0.1" placeholder="選填" class="input-field text-sm">
                     </div>
                 </div>
                 
-                <button onclick="saveData()" id="saveBtn" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold shadow-lg active:bg-indigo-700 transition-all mt-4">
-                    確認儲存紀錄
+                <button onclick="saveData()" id="saveBtn" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold shadow-lg active:bg-indigo-700 transition-all">
+                    儲存紀錄
                 </button>
             </div>
         </section>
 
         <section class="flex gap-2">
             <input type="month" id="searchMonth" onchange="renderList('month')" class="flex-1 p-2 rounded-xl border bg-white text-sm font-medium">
-            <button onclick="exportExcel()" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-bold">匯出報表</button>
+            <button onclick="exportExcel()" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-bold">匯出完整報告</button>
         </section>
 
         <section class="card p-4">
             <div class="flex bg-gray-100 rounded-xl p-1 mb-4 text-[10px] font-bold">
-                <button onclick="renderList('day')" class="flex-1 py-2 rounded-lg transition-all" id="btn-day">今日</button>
+                <button onclick="renderList('day')" class="flex-1 py-2 rounded-lg transition-all" id="btn-day">當日</button>
                 <button onclick="renderList('week')" class="flex-1 py-2 rounded-lg transition-all" id="btn-week">當周</button>
                 <button onclick="renderList('month')" class="flex-1 py-2 rounded-lg transition-all" id="btn-month">月查詢</button>
             </div>
@@ -131,15 +131,14 @@
             
             ['ex', 'sleep'].forEach(type => {
                 const saved = localStorage.getItem(`${type}_startTime_v7`);
-                if (saved) {
-                    timers[type].start = parseInt(saved);
-                    resumeTimerUI(type);
-                }
+                if (saved) { timers[type].start = parseInt(saved); resumeTimerUI(type); }
             });
             updateSummary();
             renderList('day');
+            checkCategory();
         }
 
+        // 計時器邏輯
         function toggleTimer(type) {
             timers[type].start = Date.now();
             localStorage.setItem(`${type}_startTime_v7`, timers[type].start);
@@ -163,13 +162,12 @@
             const durationMs = Date.now() - timers[type].start;
             const hours = Math.floor(durationMs / 3600000);
             const mins = Math.round((durationMs % 3600000) / 60000);
-            
             const startStr = new Date(timers[type].start).toTimeString().slice(0,5);
             const endStr = new Date().toTimeString().slice(0,5);
 
             document.getElementById('inputCategory').value = (type === 'ex') ? '運動' : '睡眠';
-            document.getElementById('inputDuration').value = (type === 'ex') ? `${mins} 分鐘` : `${hours} 小時 ${mins} 分鐘`;
-            document.getElementById('inputNote').value = `時間段：${startStr} - ${endStr}`;
+            document.getElementById('inputDuration').value = (type === 'ex') ? mins : `${hours}時${mins}分`;
+            document.getElementById('inputSymptoms').value = `時段：${startStr} - ${endStr}`;
             
             checkCategory();
             localStorage.removeItem(`${type}_startTime_v7`);
@@ -181,14 +179,37 @@
 
         function checkCategory() {
             const cat = document.getElementById('inputCategory').value;
-            document.getElementById('extraField').classList.toggle('hidden', !['運動', '睡眠'].includes(cat));
+            const label = document.getElementById('contentLabel');
+            const extra = document.getElementById('extraField');
+            
+            extra.classList.toggle('hidden', !['運動', '睡眠'].includes(cat));
+            
+            if(['飲食', '吃藥', '飲水'].includes(cat)) {
+                label.innerText = "食物與藥物名稱";
+            } else if(cat === '看診') {
+                label.innerText = "就醫診所名稱";
+            } else {
+                label.innerText = "活動項目 / 內容";
+            }
         }
 
         function saveData() {
-            const content = document.getElementById('inputContent').value;
             const cat = document.getElementById('inputCategory').value;
+            const content = document.getElementById('inputContent').value;
+            const symptoms = document.getElementById('inputSymptoms').value;
+            const medDetail = document.getElementById('inputMedDetail').value;
             
-            if(!content && cat !== '飲水') return alert('請在內容欄位填寫細項！');
+            if(!content && !symptoms && !medDetail) return alert('請至少填寫一項內容！');
+
+            // 邏輯拆分：將內容根據類別存入對應欄位
+            let foodAndDrug = "";
+            let activityMemo = "";
+
+            if(['飲食', '吃藥', '飲水'].includes(cat)) {
+                foodAndDrug = content;
+            } else {
+                activityMemo = content;
+            }
 
             const now = new Date();
             const record = {
@@ -197,10 +218,11 @@
                 time: document.getElementById('inputTime').value,
                 timestamp: now.getTime(),
                 category: cat,
-                content: content,
+                foodAndDrug: foodAndDrug,           // 食物與藥物
+                symptoms: symptoms,                 // 身體症狀與感受
+                activityMemo: activityMemo,         // 活動/備註 (含診所名)
                 duration: document.getElementById('inputDuration').value,
-                note: document.getElementById('inputNote').value,
-                medDetail: document.getElementById('inputMedDetail').value,
+                medDetail: medDetail,               // 藥單明細
                 weight: document.getElementById('baseWeight').value,
                 temp: document.getElementById('baseTemp').value
             };
@@ -209,13 +231,10 @@
             localStorage.setItem('healthFinal_v7', JSON.stringify(records));
             
             // 重置
-            ['inputContent', 'inputDuration', 'inputNote', 'inputMedDetail', 'baseWeight', 'baseTemp'].forEach(id => document.getElementById(id).value = '');
-            checkCategory();
-            
+            ['inputContent', 'inputDuration', 'inputSymptoms', 'inputMedDetail', 'baseWeight', 'baseTemp'].forEach(id => document.getElementById(id).value = '');
             const btn = document.getElementById('saveBtn');
-            btn.innerText = '✅ 已儲存至紀錄';
-            setTimeout(() => { btn.innerText = '確認儲存紀錄'; }, 1000);
-
+            btn.innerText = '✅ 儲存成功';
+            setTimeout(() => { btn.innerText = '儲存紀錄'; }, 1000);
             updateSummary();
             renderList('day');
         }
@@ -223,13 +242,10 @@
         function updateSummary() {
             const today = new Date().toLocaleDateString('en-CA');
             const todayRecs = records.filter(r => r.date === today);
-            const water = todayRecs.filter(r => r.category === '飲水').reduce((s, r) => s + (parseInt(r.content) || 0), 0);
+            const water = todayRecs.filter(r => r.category === '飲水').reduce((s, r) => s + (parseInt(r.foodAndDrug) || 0), 0);
             const ex = todayRecs.filter(r => r.category === '運動').reduce((s, r) => s + (parseInt(r.duration) || 0), 0);
-            const sleep = todayRecs.filter(r => r.category === '睡眠').length;
-
             document.getElementById('summaryWater').innerText = `💧 飲水: ${water}cc`;
-            document.getElementById('summaryEx').innerText = `🏃 運動今日: ${ex}分`;
-            document.getElementById('summarySleep').innerText = `🌙 睡眠紀錄: ${sleep}筆`;
+            document.getElementById('summaryEx').innerText = `🏃 運動: ${ex}分`;
         }
 
         function renderList(view) {
@@ -237,62 +253,55 @@
             const now = new Date();
             let filtered = [];
 
-            ['day', 'week', 'month'].forEach(v => {
-                const btn = document.getElementById(`btn-${v}`);
-                btn.className = v === view ? "flex-1 py-2 rounded-lg tab-active shadow-inner" : "flex-1 py-2 text-gray-400";
-            });
-
             if (view === 'day') filtered = records.filter(r => r.date === now.toLocaleDateString('en-CA'));
             else if (view === 'week') filtered = records.filter(r => r.timestamp >= now.getTime() - 604800000);
             else if (view === 'month') filtered = records.filter(r => r.date.startsWith(document.getElementById('searchMonth').value));
 
             container.innerHTML = filtered.map(r => `
-                <div class="p-4 card border border-gray-100 relative ${r.category === '看診' ? 'bg-blue-50/40' : ''}">
+                <div class="p-4 card border border-gray-100 relative ${r.category === '看診' ? 'bg-blue-50/30' : ''}">
                     <div class="flex justify-between items-center mb-1">
-                        <span class="text-[10px] font-bold text-indigo-400">${r.date} ${r.time}</span>
-                        <button onclick="deleteRecord(${r.id})" class="text-gray-300 hover:text-red-400 text-xs px-2">刪除</button>
+                        <span class="text-[9px] font-bold text-indigo-400">${r.date} ${r.time}</span>
+                        <button onclick="deleteRecord(${r.id})" class="text-gray-300 text-xs">刪除</button>
                     </div>
                     <div class="text-sm">
                         <span class="font-bold text-gray-800">${r.category}</span>
-                        <span class="ml-1 text-gray-600">${r.content}</span>
-                        ${r.duration ? `<span class="text-orange-600 font-bold text-xs ml-1 bg-orange-50 px-1 rounded">${r.duration}</span>` : ''}
+                        <span class="ml-1 text-gray-600">${r.foodAndDrug || r.activityMemo}</span>
+                        ${r.duration ? `<span class="text-orange-600 font-bold text-xs ml-1">[${r.duration}]</span>` : ''}
                     </div>
-                    <div class="flex flex-wrap gap-2 mt-2">
-                        ${r.weight ? `<span class="text-[9px] bg-white text-blue-600 px-1.5 py-0.5 rounded border border-blue-100 font-bold">⚖️ ${r.weight}kg</span>` : ''}
-                        ${r.temp ? `<span class="text-[9px] bg-white text-orange-600 px-1.5 py-0.5 rounded border border-orange-100 font-bold">🌡️ ${r.temp}°C</span>` : ''}
+                    <div class="mt-2 space-y-1">
+                        ${r.symptoms ? `<div class="text-[11px] text-gray-500 italic bg-gray-50 p-1.5 rounded">感受：${r.symptoms}</div>` : ''}
+                        ${r.medDetail ? `<div class="text-[11px] text-blue-600 bg-blue-50 p-1.5 rounded">藥單：${r.medDetail}</div>` : ''}
                     </div>
-                    ${r.note ? `<div class="text-[11px] text-gray-500 mt-2 bg-gray-50 p-2 rounded-lg italic">症狀：${r.note}</div>` : ''}
-                    ${r.medDetail ? `<div class="text-[11px] text-blue-700 mt-1 bg-blue-50/50 p-2 rounded-lg border-l-2 border-blue-300">明細：${r.medDetail}</div>` : ''}
                 </div>
             `).join('') || '<div class="text-center text-gray-300 py-10">尚無紀錄</div>';
         }
 
-        function deleteRecord(id) {
-            if(confirm('確定刪除這筆紀錄？')) {
-                records = records.filter(r => r.id !== id);
-                localStorage.setItem('healthFinal_v7', JSON.stringify(records));
-                updateSummary();
-                renderList('day');
-            }
-        }
+        function deleteRecord(id) { if(confirm('確定刪除？')) { records = records.filter(r => r.id !== id); localStorage.setItem('healthFinal_v7', JSON.stringify(records)); updateSummary(); renderList('day'); } }
 
         function exportExcel() {
             try {
                 const month = document.getElementById('searchMonth').value;
                 const filtered = records.filter(r => r.date.startsWith(month));
-                if(!filtered.length) return alert('目前沒有資料');
+                if(!filtered.length) return alert('無資料可以匯出');
 
                 const exportData = filtered.map(r => ({
-                    '日期': r.date, '時間': r.time, '分類': r.category, '內容/項目': r.content,
-                    '時長': r.duration || '', '身體反應與症狀': r.note || '',
-                    '藥單明細/診斷內容': r.medDetail || '', '體重': r.weight || '', '體溫': r.temp || ''
+                    '日期': r.date,
+                    '時間': r.time,
+                    '項目分類': r.category,
+                    '食物與藥物': r.foodAndDrug,
+                    '身體症狀與感受': r.symptoms,
+                    '活動/備註(含時長/診所)': `${r.activityMemo} ${r.duration ? '('+r.duration+')' : ''}`.trim(),
+                    '藥單明細': r.medDetail,
+                    '體重': r.weight,
+                    '體溫': r.temp
                 }));
 
                 const wb = XLSX.utils.book_new();
                 const ws = XLSX.utils.json_to_sheet(exportData);
-                XLSX.utils.book_append_sheet(wb, ws, "月報表");
+                ws['!cols'] = [{wch:12}, {wch:8}, {wch:10}, {wch:25}, {wch:30}, {wch:30}, {wch:30}, {wch:8}, {wch:8}];
+                XLSX.utils.book_append_sheet(wb, ws, "健康完整報告");
                 XLSX.writeFile(wb, `健康管理報告_${month}.xlsx`);
-            } catch (e) { alert('匯出失敗，請重試'); }
+            } catch (e) { alert('匯出失敗，請再試一次'); }
         }
 
         window.onload = init;
